@@ -185,6 +185,6 @@ echo "Permissions set."
 
 echo "Now let's install the containers..."
 docker-compose -f "$dockerdir/appdata/docker-compose.yml" up -d
-echo "All set, everything should be running. If you have errors, follow the complete guid. And join our discord server."
+echo "All set, everything should be running. If you have errors, follow the complete guide. And join our discord server."
 
 exit 0
