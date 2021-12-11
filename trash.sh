@@ -10,6 +10,7 @@ fi
 if ! synopkg is_onoff Docker > /dev/null 2>&1; then
     wget -qO /volume1/docker.spk "https://global.download.synology.com/download/Package/spk/Docker/20.10.3-1239/Docker-x64-20.10.3-1239.spk"
     synopkg install /volume1/docker.spk
+    synopkg start Docker
     # test it
     synopkg is_onoff Docker
 fi
