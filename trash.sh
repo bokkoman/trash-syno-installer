@@ -60,7 +60,7 @@ wget https://raw.githubusercontent.com/TRaSH-/Guides-Synology-Templates/main/doc
 echo ".env file downloaded."
 
 echo "Setting correct User ID in .env ..."
-sed -i "s/1035/$puid/g" "$dockerdir/appdata/.env"
+sed -i s/1035/"$puid"/g "$dockerdir/appdata/.env"
 echo "User ID set.."
 
 PS3='Please select your method of downloading: '
