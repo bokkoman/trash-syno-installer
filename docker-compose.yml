@@ -1,0 +1,379 @@
+version: "3.2"
+services:
+  # Radarr - https://hotio.dev/containers/radarr/
+  # mkdir /volume1/docker/appdata/radarr
+  radarr:
+    container_name: radarr
+    image: hotio/radarr:latest
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-file: ${DOCKERLOGGING_MAXFILE}
+        max-size: ${DOCKERLOGGING_MAXSIZE}
+    labels:
+      - org.hotio.pullio.update=${PULLIO_UPDATE}
+      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
+      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
+    ports:
+      - 7878:7878
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKERCONFDIR}/radarr:/config
+      - ${DOCKERSTORAGEDIR}:/data
+
+  # Sonarr - https://hotio.dev/containers/sonarr/
+  # mkdir /volume1/docker/appdata/sonarr
+  sonarr:
+    container_name: sonarr
+    image: hotio/sonarr:latest
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-file: ${DOCKERLOGGING_MAXFILE}
+        max-size: ${DOCKERLOGGING_MAXSIZE}
+    labels:
+      - org.hotio.pullio.update=${PULLIO_UPDATE}
+      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
+      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
+    ports:
+      - 8989:8989
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKERCONFDIR}/sonarr:/config
+      - ${DOCKERSTORAGEDIR}:/data
+
+  # Bazarr - https://hotio.dev/containers/bazarr/
+  # mkdir /volume1/docker/appdata/bazarr
+  bazarr:
+    container_name: bazarr
+    image: hotio/bazarr:nightly
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-file: ${DOCKERLOGGING_MAXFILE}
+        max-size: ${DOCKERLOGGING_MAXSIZE}
+    labels:
+      - org.hotio.pullio.update=${PULLIO_UPDATE}
+      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
+      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
+    ports:
+      - 6767:6767
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKERCONFDIR}/bazarr:/config
+      - ${DOCKERSTORAGEDIR}/media:/data/media
+
+  # Plex - https://hotio.dev/containers/plex/
+  # mkdir -p /volume1/docker/appdata/plex
+  # Also please read the extra info => https://trash-guides.info/Hardlinks/How-to-setup-for/Synology/#appdata
+  plex:
+    container_name: plex
+    image: hotio/plex
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-file: ${DOCKERLOGGING_MAXFILE}
+        max-size: ${DOCKERLOGGING_MAXSIZE}
+    labels:
+      - org.hotio.pullio.update=${PULLIO_UPDATE}
+      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
+      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
+    ports:
+      - 32400:32400
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=002
+      - ARGS=
+      - PLEX_CLAIM=${PLEX_CLAIM}
+      - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
+      - ALLOWED_NETWORKS=
+      - PLEX_PASS=${PLEX_PASS}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKERCONFDIR}/plex:/config:rw
+      - ${DOCKERSTORAGEDIR}/media:/data/media:rw
+    devices:
+      # optional: if you have a Syno with an Intel CPU with quicksync and want hardware transcoding (only with Plex Pass)
+      - /dev/dri:/dev/dri # optional: if you have a Syno with an Intel CPU with quicksync and want hardware transcoding (only with Plex Pass)
+
+# Deluge - https://docs.linuxserver.io/images/docker-deluge
+# <mkdir /volume1/docker/appdata/deluge>
+#deluge  deluge:
+#deluge    container_name: deluge
+#deluge    image: lscr.io/linuxserver/deluge
+#deluge    restart: unless-stopped
+#deluge    logging:
+#deluge      driver: json-file
+#deluge      options:
+#deluge        max-file: ${DOCKERLOGGING_MAXFILE}
+#deluge        max-size: ${DOCKERLOGGING_MAXSIZE}
+#deluge    labels:
+#deluge      - org.hotio.pullio.update=${PULLIO_UPDATE}
+#deluge      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
+#deluge      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
+#deluge    ports:
+#deluge      - 51413:51413
+#deluge      - 51413:51413/udp
+#deluge      - 58846:58846
+#deluge      - 58946:58946
+#deluge      - 6881:6881
+#deluge      - 6881:6881/udp
+#deluge      - 8112:8112
+#deluge    environment:
+#deluge      - PUID=${PUID}
+#deluge      - PGID=${PGID}
+#deluge      - TZ=${TZ}
+#deluge    volumes:
+#deluge      - /etc/localtime:/etc/localtime:ro
+#deluge      - ${DOCKERCONFDIR}/deluge:/config
+#deluge      - ${DOCKERSTORAGEDIR}/torrents:/data/torrents
+
+# qBittorrent - https://docs.linuxserver.io/images/docker-qbittorrent
+# <mkdir /volume1/docker/appdata/qbittorent>
+#qbittorrent  qbittorrent:
+#qbittorrent    container_name: qbittorrent
+#qbittorrent    image: lscr.io/linuxserver/qbittorrent
+#qbittorrent    restart: unless-stopped
+#qbittorrent    logging:
+#qbittorrent      driver: json-file
+#qbittorrent      options:
+#qbittorrent        max-file: ${DOCKERLOGGING_MAXFILE}
+#qbittorrent        max-size: ${DOCKERLOGGING_MAXSIZE}
+#qbittorrent    labels:
+#qbittorrent      - org.hotio.pullio.update=${PULLIO_UPDATE}
+#qbittorrent      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
+#qbittorrent      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
+#qbittorrent    ports:
+#qbittorrent      - 6881:6881
+#qbittorrent      - 6881:6881/udp
+#qbittorrent      - 8080:8080
+#qbittorrent    environment:
+#qbittorrent      - PUID=${PUID}
+#qbittorrent      - PGID=${PGID}
+#qbittorrent      - TZ=${TZ}
+#qbittorrent      - UMASK=022
+#qbittorrent      - WEBUI_PORT=8080
+#qbittorrent    volumes:
+#qbittorrent      - /etc/localtime:/etc/localtime:ro
+#qbittorrent      - ${DOCKERCONFDIR}/qbittorrent:/config:rw
+#qbittorrent      - ${DOCKERSTORAGEDIR}/torrents:/data/torrents:rw
+
+# rtorrentvpn - https://github.com/binhex/arch-rtorrentvpn
+# <mkdir /volume1/docker/appdata/rtorrentvpn>
+# start the container, and in your appdata folder a openvpn folder will be created where you need to place your .ovpn file you got from your VPN provider !!!
+# remember to change in the .env the passwords RPC2_PASS and WEBUI_PASS, default is rutorrent !!!
+# if the torrent vpn client GUI isn't visible run "sudo insmod /lib/modules/tun.ko" and if that doesn't fix it also run "sudo insmod /lib/modules/iptable_mangle.ko"
+# to make it survive boot => 'Task Scheduler', Select user 'root', event 'Boot-up' and check 'Enabled'. As script enter: "insmod /lib/modules/tun.ko"
+# and if needed "insmod /lib/modules/iptable_mangle.ko"
+#rtorrentvpn  rtorrentvpn:
+#rtorrentvpn    container_name: rtorrentvpn
+#rtorrentvpn    image: binhex/arch-rtorrentvpn:latest
+#rtorrentvpn    restart: unless-stopped
+#rtorrentvpn    logging:
+#rtorrentvpn      driver: json-file
+#rtorrentvpn      options:
+#rtorrentvpn        max-file: ${DOCKERLOGGING_MAXFILE}
+#rtorrentvpn        max-size: ${DOCKERLOGGING_MAXSIZE}
+#rtorrentvpn    labels:
+#rtorrentvpn      - org.hotio.pullio.update=${PULLIO_UPDATE}
+#rtorrentvpn      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
+#rtorrentvpn      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
+#rtorrentvpn    ports:
+#rtorrentvpn      - ${RTORRENTVPN_PORT_9080}:9080
+#rtorrentvpn      - 9443:9443/tcp
+#rtorrentvpn      - ${RTORRENTVPN_PORT_8118}:8118
+#rtorrentvpn    privileged: true
+#rtorrentvpn    cap_add:
+#rtorrentvpn      - NET_ADMIN
+#rtorrentvpn    environment:
+#rtorrentvpn      - PUID=${PUID}
+#rtorrentvpn      - PGID=${PGID}
+#rtorrentvpn      - TZ=${TZ}
+#rtorrentvpn      - UMASK=022
+#rtorrentvpn      - DEBUG=false
+#rtorrentvpn      - VPN_ENABLED=${VPN_ENABLE}
+#rtorrentvpn      - VPN_CLIENT=openvpn
+#rtorrentvpn      - VPN_USER=${VPN_USER}
+#rtorrentvpn      - VPN_PASS=${VPN_PASS}
+#rtorrentvpn      - VPN_PROV=${VPN_PROV}
+#rtorrentvpn      - STRICT_PORT_FORWARD=yes
+#rtorrentvpn      - LAN_NETWORK=${LAN_NETWORK}
+#rtorrentvpn      - NAME_SERVERS=209.222.18.222,84.200.69.80,37.235.1.174,1.1.1.1,209.222.18.218,37.235.1.177,84.200.70.40,1.0.0.1
+#rtorrentvpn      - WEBUI_PORT=${RTORRENTVPN_PORT_9080}
+#rtorrentvpn      - ENABLE_PRIVOXY=${RTORRENTVPN_ENABLE_PRIVOXY}
+#rtorrentvpn      - ENABLE_AUTODL_IRSSI=${RTORRENTVPN_ENABLE_AUTODL_IRSSI}
+#rtorrentvpn      - ENABLE_RPC2=${RTORRENTVPN_ENABLE_RPC2}
+#rtorrentvpn      - ENABLE_RPC2_AUTH=${RTORRENTVPN_ENABLE_RPC2_AUTH}
+#rtorrentvpn      - RPC2_PASS=${RTORRENTVPN_RPC2_PASS}
+#rtorrentvpn      - RPC2_USER=${RTORRENTVPN_RPC2_USER}
+#rtorrentvpn      - ENABLE_WEBUI_AUTH=${RTORRENTVPN_ENABLE_WEBUI_AUTH}
+#rtorrentvpn      - WEBUI_PASS=${RTORRENTVPN_WEBUI_PASS}
+#rtorrentvpn      - WEBUI_USER=${RTORRENTVPN_WEBUI_USER}
+#rtorrentvpn    volumes:
+#rtorrentvpn      - /etc/localtime:/etc/localtime:ro
+#rtorrentvpn      - ${DOCKERCONFDIR}/binhex-rtorrentvpn:rw
+#rtorrentvpn      - ${DOCKERSTORAGEDIR}/torrents:/data/torrents:rw
+
+# SABnzbd - https://hotio.dev/containers/sabnzbd/
+# <mkdir /volume1/docker/appdata/sabnzbd>
+#sabnzbd  sabnzbd:
+#sabnzbd    container_name: sabnzbd
+#sabnzbd    image: hotio/sabnzbd:latest
+#sabnzbd    restart: unless-stopped
+#sabnzbd    logging:
+#sabnzbd      driver: json-file
+#sabnzbd      options:
+#sabnzbd        max-file: ${DOCKERLOGGING_MAXFILE}
+#sabnzbd        max-size: ${DOCKERLOGGING_MAXSIZE}
+#sabnzbd    labels:
+#sabnzbd      - org.hotio.pullio.update=${PULLIO_UPDATE}
+#sabnzbd      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
+#sabnzbd      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
+#sabnzbd    ports:
+#sabnzbd      - 8080:8080
+#sabnzbd      - 9090:9090
+#sabnzbd    environment:
+#sabnzbd      - PUID=${PUID}
+#sabnzbd      - PGID=${PGID}
+#sabnzbd      - TZ=${TZ}
+#sabnzbd    volumes:
+#sabnzbd      - /etc/localtime:/etc/localtime:ro
+#sabnzbd      - ${DOCKERCONFDIR}/sabnzbd:/config
+#sabnzbd      - ${DOCKERSTORAGEDIR}/usenet:/data/usenet:rw
+
+# NZBGet - https://hotio.dev/containers/nzbget/
+# <mkdir /volume1/docker/appdata/nzbget>
+#nzbget  nzbget:
+#nzbget    container_name: nzbget
+#nzbget    image: hotio/nzbget:latest
+#nzbget    restart: unless-stopped
+#nzbget    logging:
+#nzbget      driver: json-file
+#nzbget      options:
+#nzbget        max-file: ${DOCKERLOGGING_MAXFILE}
+#nzbget        max-size: ${DOCKERLOGGING_MAXSIZE}
+#nzbget    labels:
+#nzbget      - org.hotio.pullio.update=${PULLIO_UPDATE}
+#nzbget      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
+#nzbget      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
+#nzbget    ports:
+#nzbget      - 6789:6789/tcp
+#nzbget    environment:
+#nzbget      - PUID=${PUID}
+#nzbget      - PGID=${PGID}
+#nzbget      - TZ=${TZ}
+#nzbget    volumes:
+#nzbget      - /etc/localtime:/etc/localtime:ro
+#nzbget      - ${DOCKERCONFDIR}/nzbget:/config:rw
+#nzbget      - ${DOCKERSTORAGEDIR}/usenet:/data/usenet:rw
+
+# delugevpn - https://github.com/binhex/arch-delugevpn
+# <mkdir /volume1/docker/appdata/delugevpn>
+# start the container, and in your appdata a openvpn folder will be created where you need to place your .ovpn file you got from your VPN provider !!!
+# if the torrent vpn client GUI isn't visible run "sudo insmod /lib/modules/tun.ko" and if that doesn't fix it also run "sudo insmod /lib/modules/iptable_mangle.ko"
+# to make it survive boot => 'Task Scheduler', Select user 'root', event 'Boot-up' and check 'Enabled'. As script enter: "insmod /lib/modules/tun.ko"
+# and if needed "insmod /lib/modules/iptable_mangle.ko"
+#delugevpn  delugevpn:
+#delugevpn    container_name: delugevpn
+#delugevpn    image: binhex/arch-delugevpn:latest
+#delugevpn    restart: unless-stopped
+#delugevpn    logging:
+#delugevpn      driver: json-file
+#delugevpn      options:
+#delugevpn        max-file: ${DOCKERLOGGING_MAXFILE}
+#delugevpn        max-size: ${DOCKERLOGGING_MAXSIZE}
+#delugevpn    labels:
+#delugevpn      - org.hotio.pullio.update=${PULLIO_UPDATE}
+#delugevpn      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
+#delugevpn      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
+#delugevpn    ports:
+#delugevpn      - ${DELUGEVPN_PORT_8112}:8112
+#delugevpn      - ${DELUGEVPN_PORT_8118}:8118
+#delugevpn      - 58846:58846
+#delugevpn      - 58946:58946
+#delugevpn    privileged: true
+#delugevpn    cap_add:
+#delugevpn      - NET_ADMIN
+#delugevpn    environment:
+#delugevpn      - PUID=${PUID}
+#delugevpn      - PGID=${PGID}
+#delugevpn      - TZ=${TZ}
+#delugevpn      - UMASK=022
+#delugevpn      - DEBUG=false
+#delugevpn      - VPN_ENABLED=${VPN_ENABLE}
+#delugevpn      - VPN_CLIENT=openvpn
+#delugevpn      - VPN_USER=${VPN_USER}
+#delugevpn      - VPN_PASS=${VPN_PASS}
+#delugevpn      - VPN_PROV=${VPN_PROV}
+#delugevpn      - STRICT_PORT_FORWARD=yes
+#delugevpn      - LAN_NETWORK=${LAN_NETWORK}
+#delugevpn      - NAME_SERVERS=209.222.18.222,84.200.69.80,37.235.1.174,1.1.1.1,209.222.18.218,37.235.1.177,84.200.70.40,1.0.0.1
+#delugevpn      - ENABLE_PRIVOXY=${DELUGEVPN_ENABLE_PRIVOXY}
+#delugevpn    volumes:
+#delugevpn      - /etc/localtime:/etc/localtime:ro
+#delugevpn      - ${DOCKERCONFDIR}/delugevpn:/config:rw
+#delugevpn      - ${DOCKERSTORAGEDIR}/torrents:/data/torrents:rw
+
+# qBittorrentvpn - https://github.com/binhex/arch-qbittorrentvpn
+# <mkdir /volume1/docker/appdata/qbittorrentvpn>
+# start the container, and in your appdata a openvpn folder will be created where you need to place your .ovpn file you got from your VPN provider !!!
+# if the torrent vpn client GUI isn't visible run "sudo insmod /lib/modules/tun.ko" and if that doesn't fix it also run "sudo insmod /lib/modules/iptable_mangle.ko"
+# to make it survive boot => 'Task Scheduler', Select user 'root', event 'Boot-up' and check 'Enabled'. As script enter: "insmod /lib/modules/tun.ko"
+# and if needed "insmod /lib/modules/iptable_mangle.ko"
+#qbittorrentvpn  qbittorrentvpn:
+#qbittorrentvpn    container_name: qbittorrentvpn
+#qbittorrentvpn    image: binhex/arch-qbittorrentvpn:latest
+#qbittorrentvpn    restart: unless-stopped
+#qbittorrentvpn    logging:
+#qbittorrentvpn      driver: json-file
+#qbittorrentvpn      options:
+#qbittorrentvpn        max-file: ${DOCKERLOGGING_MAXFILE}
+#qbittorrentvpn        max-size: ${DOCKERLOGGING_MAXSIZE}
+#qbittorrentvpn    labels:
+#qbittorrentvpn      - org.hotio.pullio.update=${PULLIO_UPDATE}
+#qbittorrentvpn      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
+#qbittorrentvpn      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
+#qbittorrentvpn    ports:
+#qbittorrentvpn      - ${QBITTORRENTVPN_PORT_8080}:8080/tcp
+#qbittorrentvpn      - ${QBITTORRENTVPN_PORT_8118}:8118/tcp
+#qbittorrentvpn    privileged: true
+#qbittorrentvpn    cap_add:
+#qbittorrentvpn      - NET_ADMIN
+#qbittorrentvpn    environment:
+#qbittorrentvpn      - PUID=${PUID}
+#qbittorrentvpn      - PGID=${PGID}
+#qbittorrentvpn      - TZ=${TZ}
+#qbittorrentvpn      - UMASK=022
+#qbittorrentvpn      - DEBUG=false
+#qbittorrentvpn      - VPN_ENABLED=${VPN_ENABLE}
+#qbittorrentvpn      - VPN_CLIENT=openvpn
+#qbittorrentvpn      - VPN_USER=${VPN_USER}
+#qbittorrentvpn      - VPN_PASS=${VPN_PASS}
+#qbittorrentvpn      - VPN_PROV=${VPN_PROV}
+#qbittorrentvpn      - STRICT_PORT_FORWARD=yes
+#qbittorrentvpn      - LAN_NETWORK=${LAN_NETWORK}
+#qbittorrentvpn      - NAME_SERVERS=209.222.18.222,84.200.69.80,37.235.1.174,1.1.1.1,209.222.18.218,37.235.1.177,84.200.70.40,1.0.0.1
+#qbittorrentvpn      - WEBUI_PORT=${QBITTORRENTVPN_PORT_8080}
+#qbittorrentvpn      - ENABLE_PRIVOXY=${QBITTORRENTVPN_ENABLE_PRIVOXY}
+#qbittorrentvpn    volumes:
+#qbittorrentvpn      - /etc/localtime:/etc/localtime:ro
+#qbittorrentvpn      - ${DOCKERCONFDIR}/binhex-qbittorrentvpn:/config:rw
+#qbittorrentvpn      - ${DOCKERSTORAGEDIR}/torrents:/data/torrents:rw
