@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 
 mapfile -t volume_list_array < <(mount -l | grep -E "/volume[0-9]{1,2}\s" | awk '{ print $3 }' | sort -V) # printf '%s\n' "${volume_list_array[@]}"
 
@@ -23,3 +23,4 @@ else
     }
     createmenu "${volume_list_array[@]}"
 fi
+exit
