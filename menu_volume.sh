@@ -23,4 +23,4 @@ else
     }
     createmenu "${volume_list_array[@]}"
 fi
-exit
+
