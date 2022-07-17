@@ -431,7 +431,7 @@ get_app_compose() {
 }
 
 # Start menu selection
-my_options=("Radarr" "Sonarr" "Bazarr" "Prowlarr" "Plex" "NZBGet" "SabNZBd" "Qbittorrent" "Notifiarr" "Recyclarr" "Tautulli" "Overseerr")
+my_options=("radarr" "sonarr" "bazarr" "prowlarr" "plex" "nzbget" "sabnzbd" "qbittorrent" "notifiarr" "recyclarr" "tautulli" "overseerr")
 preselection=("true" "true" "true" "true" "true")
 
 multiselect "true" my_options preselection
@@ -497,3 +497,4 @@ while true; do
         *) echo "Please answer yes or no." ;;
     esac
 done
+exit
