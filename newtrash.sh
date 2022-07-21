@@ -2,49 +2,9 @@
 
 # shellcheck disable=SC2034  # Unused variables left for readability
 
-####################### DESCRIPTION: #######################
-#
-# multiselect is a pure bash implementation of a multi
-# selection menu.
-#
-# If "true" is passed as first argument a help (similar to
-# the overview in section "USAGE") will be printed before
-# showing the options. Any other value will hide it.
-#
-# The result will be stored as an array in a variable
-# that is passed to multiselect as second argument.
-#
-# The third argument takes an array that contains all
-# available options.
-#
-# The last argument is optional and can be used to
-# preselect certain options. If used it must be an array
-# that has a value of "true" for every index of the options
-# array that should be preselected.
-#
-########################## USAGE: ##########################
-#
-#   j or ↓        => down
-#   k or ↑        => up
-#   ⎵ (Space)     => toggle selection
-#   ⏎ (Enter)     => confirm selection
-#
-######################### EXAMPLE: #########################
-#
-# source <(curl -sL multiselect.miu.io)
-#
-# my_options=(   "Option 1"  "Option 2"  "Option 3" )
-# preselection=( "true"      "true"      "false"    )
-#
-# multiselect "true" result my_options preselection
-#
-# idx=0
-# for option in "${my_options[@]}"; do
-#     echo -e "$option\t=> ${result[idx]}"
-#     ((idx++))
-# done
-#
-############################################################
+# MIT License
+
+# Copyright (c) 2022 Bokkoman
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -76,13 +36,13 @@
 
 ## start of multi select
 function multiselect {
-    if [[ "${1}" = "true" ]]; then
-        echo -e "j or ↓\t\t=> down"
-        echo -e "k or ↑\t\t=> up"
-        echo -e "⎵ (Space)\t=> toggle selection"
-        echo -e "⏎ (Enter)\t=> confirm selection"
-        echo
-    fi
+    printf '\n'
+    local my_options=("Radarr" "Sonarr" "Bazarr" "Prowlarr" "Plex" "NZBGet" "SabNZBd" "Qbittorrent" "Notifiarr" "Recyclarr" "Tautulli" "Overseerr")
+    local preselection=("true" "false" "false" "false" "false" "false")
+    local lastrow
+    local startrow
+    local selected=()
+    selected_options=()
 
     # little helpers for terminal print control and key input
     cursor_blink_on() { printf "\033[?25h"; }
@@ -95,12 +55,8 @@ function multiselect {
         printf '%b' "${ROW#*[}"
     }
 
-    local -n options="${2}"
-    local -n defaults="${3}"
-
-    local selected=()
-    for ((i = 0; i < ${#options[@]}; i++)); do
-        if [[ "${defaults[i]}" = "true" ]]; then
+    for defaults in "${!my_options[@]}"; do
+        if [[ "${preselection[defaults]}" == 'true' ]]; then
             selected+=("true")
         else
             selected+=("false")
@@ -108,11 +64,9 @@ function multiselect {
         printf "\n"
     done
 
-    # determine current screen position for overwriting the options
-    local lastrow
+    # determine current screen position for overwriting the my_options
     lastrow="$(get_cursor_row)"
-    local startrow
-    startrow="$((lastrow - ${#options[@]}))"
+    startrow="$((lastrow - ${#my_options[@]}))"
 
     # ensure cursor and input echoing back on upon a ctrl+c during read -s
     trap "cursor_blink_on; stty echo; printf '\n'; exit" 2
@@ -120,7 +74,7 @@ function multiselect {
 
     key_input() {
         local key
-        IFS= read -rsn1 key 2> /dev/null >&2
+        IFS= read -rsn1 key &> /dev/null
         case "${key}" in
             '')
                 echo enter
@@ -150,8 +104,8 @@ function multiselect {
     }
 
     toggle_option() {
-        local option=$1
-        if [[ ${selected[option]} == true ]]; then
+        local option="${1}"
+        if [[ "${selected[option]}" == 'true' ]]; then
             selected[option]=false
         else
             selected[option]=true
@@ -161,7 +115,7 @@ function multiselect {
     print_options() {
         # print options by overwriting the last lines
         local idx=0
-        for option in "${options[@]}"; do
+        for option in "${my_options[@]}"; do
             local prefix="[ ]"
             if [[ ${selected[idx]} == true ]]; then
                 prefix="[\e[38;5;46m✔\e[0m]"
@@ -182,18 +136,20 @@ function multiselect {
         print_options "${active}"
         # user key control
         case $(key_input) in
-            space) toggle_option "${active}" ;;
+            space)
+                toggle_option "${active}"
+                ;;
             enter)
                 print_options -1
                 break
                 ;;
             up)
                 ((active--))
-                if [[ "${active}" -lt 0 ]]; then active=$((${#options[@]} - 1)); fi
+                if [[ "${active}" -lt 0 ]]; then active=$((${#my_options[@]} - 1)); fi
                 ;;
             down)
                 ((active++))
-                if [[ "${active}" -ge ${#options[@]} ]]; then active=0; fi
+                if [[ "${active}" -ge "${#my_options[@]}" ]]; then active=0; fi
                 ;;
         esac
     done
@@ -203,11 +159,23 @@ function multiselect {
     printf "\n"
     cursor_blink_on
 
-    declare -gA result
+    if [[ ! "${selected[*]}" =~ 'true' ]]; then
+        printf '%s\n' "You must select at least one option to proceed. Try again"
+        exit 1
+    fi
+
     for i in "${!my_options[@]}"; do
-        result["${my_options[i]}"]="${selected[i]}"
+        if [[ "${selected[i]}" == 'true' ]]; then
+            selected_options+=("${my_options[i]}")
+        fi
     done
+
+    # You can use thee "${selected_options[@]}" array to install apps as it is just the name of the app.
+    printf 'You have selected:\n\n'
+    printf '%s\n' "${selected_options[@]}"
+    printf '\n'
 }
+
 # Start prerequisites
 # check for root access and exit if the user does not have the required privilages.
 if [[ "$(id -un)" != 'root' ]]; then
@@ -392,7 +360,6 @@ else
     exit 1
 fi
 
-# Set all .env variables
 printf '\n%s\n\n' "Setting correct User ID in .env ..."
 sed -i "s|PUID=1035|PUID=$(id "$user" -u)|g" "$docker_conf_dir/appdata/.env"
 printf '\n%s\n\n' "User ID set.."
@@ -430,36 +397,28 @@ get_app_compose() {
     fi
 }
 
-# Start menu selection
-my_options=("radarr" "sonarr" "bazarr" "prowlarr" "plex" "nzbget" "sabnzbd" "qbittorrent" "notifiarr" "recyclarr" "tautulli" "overseerr")
-preselection=("true" "true" "true" "true" "true")
-
-multiselect "true" my_options preselection
-
-for options in "${!result[@]}"; do
-    if [[ "${result[$options]}" == true ]]; then
-        selected_options+=("${options}")
-        get_app_compose "$options"
-    elif [[ ! "${result[*]}" =~ 'true' ]]; then
-        printf '%s\n' "it's null bruh"
-        exit 1
-    fi
-done
-
-#for app in "${selected_options[@]}"; do
-#    get_app_compose "$app"
-#done
-
-# You can use thee "${selected_options[@]}" array to install apps as it is just the name of the app.
-
-printf 'You have selected:\n\n'
-printf '%s\n' "${selected_options[@]}"
-printf '\n'
+multiselect
 
 while true; do
     read -rp "Is this correct selection? " yn
     case $yn in
         [Yy]*)
+            printf '\n%s\n\n' "Creating docker-compose..."
+            for options in "${selected_options[@]}"; do
+                get_app_compose "$options"
+            done
+            if [[ "${selected_options[*]}" == "Plex" ]]; then
+                #check for quick sync
+                if [[ -d "$qsv" ]]; then
+                    ### Do nothing if $qsv exists.
+                    printf '\n%s\n' "Intel Quick Sync found for Plex Hardware Transcoding."
+                else
+                    ### Take action if $qsv does not exist.
+                    sed -i "s|    devices:|#    devices:|g" "$docker_conf_dir/appdata/docker-compose.yml"
+                    sed -i "s|      - /dev/dri:/dev/dri|#      - /dev/dri:/dev/dri|g" "$docker_conf_dir/appdata/docker-compose.yml"
+                    printf '\n%s\n' "No Intel Quick Sync found for Plex Hardware Transcoding."
+                fi
+            fi
             printf '\n%s\n\n' "Doing final permissions stuff..."
             chown -R "$user":"$group" "$docker_data_dir" "$docker_conf_dir"
             chmod -R a=,a+rX,u+w,g+w "$docker_data_dir" "$docker_conf_dir"
@@ -493,8 +452,22 @@ while true; do
             printf '\n%s\n\n' "All set, everything should be running. If you have errors, follow the complete guide. And join our discord server."
             break
             ;;
-        [Nn]*) printf '\n%s\n\n' "Rerun the script." exit ;;
+        [Nn]*)
+            multiselect
+            ;;
         *) echo "Please answer yes or no." ;;
     esac
 done
+
+#check for quick sync
+if [[ -d "$qsv" ]]; then
+    ### Do nothing if $qsv exists.
+    printf '\n%s\n' "Intel Quick Sync found for Plex Hardware Transcoding."
+else
+    ### Take action if $qsv does not exist.
+    sed -i "s|    devices:|#    devices:|g" "$docker_conf_dir/appdata/docker-compose.yml"
+    sed -i "s|      - /dev/dri:/dev/dri|#      - /dev/dri:/dev/dri|g" "$docker_conf_dir/appdata/docker-compose.yml"
+    printf '\n%s\n' "No Intel Quick Sync found for Plex Hardware Transcoding."
+fi
+
 exit
