@@ -459,15 +459,4 @@ while true; do
     esac
 done
 
-#check for quick sync
-if [[ -d "$qsv" ]]; then
-    ### Do nothing if $qsv exists.
-    printf '\n%s\n' "Intel Quick Sync found for Plex Hardware Transcoding."
-else
-    ### Take action if $qsv does not exist.
-    sed -i "s|    devices:|#    devices:|g" "$docker_conf_dir/appdata/docker-compose.yml"
-    sed -i "s|      - /dev/dri:/dev/dri|#      - /dev/dri:/dev/dri|g" "$docker_conf_dir/appdata/docker-compose.yml"
-    printf '\n%s\n' "No Intel Quick Sync found for Plex Hardware Transcoding."
-fi
-
 exit
