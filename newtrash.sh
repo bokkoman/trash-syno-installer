@@ -513,8 +513,8 @@ get_app_compose() {
 #################################################################################################################################################
 printf '\n%b' "↓ => down"
 printf '\n%b' "↑ => up"
-printf '\n%b' "⎵ (Space) \=> toggle selection"
-printf '\n%b\n' "⏎ (Enter) \=> confirm selection"
+printf '\n%b' "⎵ (Space) => toggle selection"
+printf '\n%b\n' "⏎ (Enter) => confirm selection"
 printf '\n%b' " "
 _multiselect
 #################################################################################################################################################
@@ -526,7 +526,6 @@ while true; do
         [Yy]*)
             printf '\n%b\n' " ${ulmc} Creating docker-compose"
             for options in "${selected_options[@]}"; do
-                mkdir -p "${docker_data_dir}/${options,,}"
                 mkdir -p "${docker_conf_dir}/appdata/${options,,}"
                 get_app_compose "${options}"
                 [[ "${options,,}" == "plex" ]] && plex_installed="yes"
