@@ -489,10 +489,6 @@ printf '\n%b\n' " ${utick} ${clc}${docker_conf_dir}${cend} set."
 printf '\n%b\n' " ${ulmc} Setting correct docker storage dir in the .env"
 sed -i "s|DOCKERSTORAGEDIR=/volume1/data|DOCKERSTORAGEDIR=${docker_data_dir}|g" "${docker_conf_dir}/appdata/.env"
 printf '\n%b\n' " ${utick} ${clc}${docker_data_dir}${cend} set."
-
-printf '\n%b\n' " ${ulmc} Setting correct docker storage dir in the .env"
-sed -i "s|DOCKERSTORAGEDIR=/volume1/data|DOCKERSTORAGEDIR=${docker_data_dir}|g" "${docker_conf_dir}/appdata/.env"
-printf '\n%b\n' " ${utick} ${clc}${docker_data_dir}${cend} set."
 #################################################################################################################################################
 # compose template downloader
 #################################################################################################################################################
@@ -515,10 +511,10 @@ get_app_compose() {
 #################################################################################################################################################
 # Run _multiselect function
 #################################################################################################################################################
-printf '\n%b\n' "↓ => down"
-printf '\n%b\n' "↑ => up"
-printf '\n%b\n' "⎵ (Space) \=> toggle selection"
-printf '\n%b\n' "⏎ (Enter) \=> confirm selection"
+printf "↓ => down"
+printf "↑ => up"
+printf "⎵ (Space) \=> toggle selection"
+printf "⏎ (Enter) \=> confirm selection"
 printf '\n%b\n' " "
 _multiselect
 #################################################################################################################################################
@@ -530,6 +526,7 @@ while true; do
         [Yy]*)
             printf '\n%b\n' " ${ulmc} Creating docker-compose"
             for options in "${selected_options[@]}"; do
+                mkdir -p "${docker_data_dir}/${options,,}"
                 mkdir -p "${docker_conf_dir}/appdata/${options,,}"
                 get_app_compose "${options}"
                 [[ "${options,,}" == "plex" ]] && plex_installed="yes"
