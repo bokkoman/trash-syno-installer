@@ -531,8 +531,8 @@ while true; do
                 [[ "${options,,}" == "plex" ]] && plex_installed="yes"
                 [[ "${options,,}" =~ ^(radarr)$ ]] && mkdir -p "${docker_data_dir}/media/movies"
                 [[ "${options,,}" =~ ^(sonarr)$ ]] && mkdir -p "${docker_data_dir}/media/tv"
-                [[ "${options,,}" =~ ^(sabnzbd|nzbget)$ ]] && mkdir -p "${docker_data_dir}/usenet/{tv,movies}"
-                [[ "${options,,}" =~ ^(qbittorrent)$ ]] && mkdir -p "${docker_data_dir}/torrents/{tv,movies}"
+                [[ "${options,,}" =~ ^(sabnzbd|nzbget)$ ]] && mkdir -p "${docker_data_dir}"/usenet/{tv,movies}
+                [[ "${options,,}" =~ ^(qbittorrent)$ ]] && mkdir -p "${docker_data_dir}"/torrents/{tv,movies}
             done
 
             if [[ "${plex_installed}" == "yes" ]]; then
