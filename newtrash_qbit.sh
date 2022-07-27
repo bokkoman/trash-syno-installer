@@ -571,7 +571,7 @@ while true; do
                         [Nn]*)
                             printf '\n%b\n' "No VPN please."
                             sed -r 's|VPN_ENABLED=true|VPN_ENABLED=false|g' -i "${docker_conf_dir}/appdata/.env"
-                            exit
+                            break
                             ;;
                     esac
                 done
