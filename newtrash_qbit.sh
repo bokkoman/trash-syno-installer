@@ -554,7 +554,7 @@ while true; do
                     case "${yesno}" in
                         [Yy]*)
                             printf '\n%b\n' "With VPN please."
-                            read -erp $' \e[32m\U2714\e[0m '"Place your wg0.conf in /Docker/appdata/qbittorrent and confirm with yes "$'\e[38;5;10m'"[y]es"$'\e[m'" or "$'\e[38;5;9m'"[n]o"$'\e[m'" : " -i "y" yes
+                            read -erp $' \e[32m\U2714\e[0m '"Place your wg0.conf in /Docker/appdata/qbittorrent and confirm with yes "$'\e[38;5;10m'"[y]es"$'\e[m'" : " -i "y" yes
                             case "${yes}" in
                                 [Yy]*)
                                     printf '\n%b\n' "With VPN please."
