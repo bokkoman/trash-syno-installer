@@ -554,14 +554,14 @@ while true; do
                     case "${yesno}" in
                         [Yy]*)
                             printf '\n%b\n' "With VPN please."
-                            read -erp $' \e[32m\U2714\e[0m '"Place your wg0.conf in ${clc}/Docker/appdata/qbittorrent/wireguard${cend} and confirm with yes "$'\e[38;5;10m'"[y]es"$'\e[m'" : " -i "" yes
+                            read -erp $' \e[32m\U2714\e[0m '"Place your wg0.conf in ${clc}/Docker/appdata/qbittorrent/wireguard${cend} \\n and confirm with yes "$'\e[38;5;10m'"[y]es"$'\e[m'" : " -i "" yes
                             case "${yes}" in
                                 [Yy]*)
                                     printf '\n%b\n' " ${ulmc} With VPN please."
                                     if sed -r 's|AllowedIPs = *|AllowedIPs = 0.0.0.0/1,128.0.0.0/1|g' -i "${docker_conf_dir}/appdata/qbittorrent/wireguard/wg0.conf"; then
                                         printf '\n%b\n' " ${utick} wg0.conf found and fixed."
                                     else
-                                        printf '\n%b\n' " ${ucross} wg0.conf not found. Place file with filename wg0.conf name and restart script."
+                                        printf '\n%b\n' " ${ucross} wg0.conf not found. Place file with filename ${clc}wg0.conf${cend} and restart script."
                                         exit
                                     fi
                                     break
