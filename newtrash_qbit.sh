@@ -550,11 +550,11 @@ while true; do
             fi
             if [[ "${qbit_installed}" == "yes" ]]; then
                 while true; do
-                    read -erp $' \e[32m\U2714\e[0m '"Do you want Qbittorrent installed with VPN? "$'\e[38;5;10m'"[y]es"$'\e[m'" or "$'\e[38;5;9m'"[n]o"$'\e[m'" : " -i "y" yesno
+                    read -erp $' \e[32m\U2714\e[0m '"Do you want Qbittorrent installed with VPN? "$'\e[38;5;10m'"[y]es"$'\e[m'" or "$'\e[38;5;9m'"[n]o"$'\e[m'" : " -i "" yesno
                     case "${yesno}" in
                         [Yy]*)
                             printf '\n%b\n' "With VPN please."
-                            read -erp $' \e[32m\U2714\e[0m '"Place your wg0.conf in ${clc}/Docker/appdata/qbittorrent/wireguard${cend} \\n and confirm with yes "$'\e[38;5;10m'"[y]es"$'\e[m'" : " -i "" yes
+                            read -erp $' \e[32m\U2714\e[0m '"Place your wg0.conf in ${clc}/Docker/appdata/qbittorrent/wireguard${cend} "$'\n'" and confirm with yes "$'\e[38;5;10m'"[y]es"$'\e[m'" : " -i "" yes
                             case "${yes}" in
                                 [Yy]*)
                                     printf '\n%b\n' " ${ulmc} With VPN please."
