@@ -481,7 +481,7 @@ get_app_compose() {
 
         [[ "${options}" = 'sabnzbd' ]] && sed -r 's|- 8080:8080$|- 7080:8080|g' -i "${docker_conf_dir}/appdata/${1}.yml"
         [[ "${options}" == 'dozzle' ]] && sed -r 's|- 8080:8080$|- 7081:8080|g' -i "${docker_conf_dir}/appdata/${1}.yml"
-        [[ "${options}" == 'qbittorrent' ]] && sed -r 's|devices:|devices: #qbit|g' -e 's|- /dev/net/tun:/dev/net/tun|- /dev/net/tun:/dev/net/tun #qbit|g' -i "${docker_conf_dir}/appdata/${1}.yml"
+        [[ "${options}" == 'qbittorrent' ]] && sed -r -e 's|devices:|devices: #qbit|g' -r -e 's|- /dev/net/tun:/dev/net/tun|- /dev/net/tun:/dev/net/tun #qbit|g' -i "${docker_conf_dir}/appdata/${1}.yml"
 
         sed -n 'p' "${docker_conf_dir}/appdata/${1}.yml" >> "${docker_conf_dir}/appdata/docker-compose.yml"
         rm -f "${docker_conf_dir}/appdata/${1}.yml"
