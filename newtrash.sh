@@ -26,8 +26,7 @@
 
 # Author       - Ideas and original and code by @bokkoman.
 # Contributors - Big thanks to @userdocs for helping with the script.
-# Testers      - Thanks @Davo1624 for testing.
-# Supporters   - @thezak48 for not getting upset we spammed the #general channel
+# Testers      - Thanks @Davo1624 for testing initial script. Xpenology for providing VM images.
 # Credits      - https://trash-guides.info https://github.com/TRaSH-/Guides-Synology-Templates
 
 ## This script is created for Synology systems that support Docker. Tested on DSM v7.1
@@ -91,21 +90,9 @@ function _multiselect {
     # Create an array of all container namees https://docs.docker.com/engine/reference/commandline/ps/#formatting
     mapfile -t installed_containers < <(docker ps --format "{{.Names}}")
 
-    # If the gGithub url responds with 200 then set our my_options associative array using he list of templates in that folder else exit and call the FBI
-    if [[ $(curl -o /dev/null -s -w "%{http_code}\n" "https://github.com/TRaSH-/Guides-Synology-Templates/tree/main/templates") -eq '200' ]]; then
-        mapfile -t available_templates < <(curl -sL "https://github.com/TRaSH-/Guides-Synology-Templates/tree/main/templates" | grep -Eo 'templates\/([a-z]+)' | cut -d'/' -f2)
-    else
-        printf "%b\n\n" " ${ulrc} Github cannot be contacted, Check your networks settings"
-        exit 1
-    fi
-
     # Create our menu my_options associative array
     declare -A my_options
-
-    # Create the array keys and values from the available_templates array , with all values defualted to false.
-    for templates in "${available_templates[@]}"; do
-        my_options["${templates}"]="false"
-    done
+    eval "$(curl -sL "https://raw.githubusercontent.com/TRaSH-/Guides-Synology-Templates/main/templates/template-file-list.json" | jq -r '.templates | to_entries[]|@sh"my_options[\(.value)]=false"')"
 
     # Create some local arrays we need and make sure they're set to empty when the function is used/looped in the script
     local selected_values=()
@@ -117,8 +104,8 @@ function _multiselect {
 
     # check the installed_containers array to see what is already installed, matched against our available_templates array so as not to add non template containers to the menu
     for index in "${installed_containers[@]}"; do
-        if [[ ${available_templates[*]} =~ ${index/nzbhydra2/nzbhydra} ]]; then
-            my_options["${index/nzbhydra2/nzbhydra}"]="true"
+        if [[ "${!my_options[*]}" =~ ${index} ]]; then
+            my_options["${index}"]="true"
         fi
     done
 
@@ -257,11 +244,7 @@ function _multiselect {
 
         for final_selection in "${!my_options[@]}"; do
             if [[ "${my_options[$final_selection]}" == 'true' ]]; then
-                if [[ $final_selection == 'nzbhydra2' ]]; then
-                    selected_options+=("nzbhydra")
-                else
-                    selected_options+=("$final_selection")
-                fi
+                selected_options+=("$final_selection")
             fi
         done
 
@@ -496,9 +479,9 @@ get_app_compose() {
     if wget -qO "${docker_conf_dir}/appdata/${1}.yml" "https://raw.githubusercontent.com/TRaSH-/Guides-Synology-Templates/main/templates/${1,,}.yml"; then
         printf '\n' >> "${docker_conf_dir}/appdata/docker-compose.yml"
 
-        [[ "${options,,}" =~ ^(sabnzbd)$ ]] && sed -r 's|- 8080:8080$|- 7080:8080|g' -i "${docker_conf_dir}/appdata/${1}.yml"
-        [[ "${options,,}" =~ ^(dozzle)$ ]] && sed -r 's|- 8080:8080$|- 7081:8080|g' -i "${docker_conf_dir}/appdata/${1}.yml"
-        [[ "${options,,}" =~ ^(qbittorrent)$ ]] && sed -r 's|VPN_ENABLED=true|VPN_ENABLED=false|g' -i "${docker_conf_dir}/appdata/.env"
+        [[ "${options}" = 'sabnzbd' ]] && sed -r 's|- 8080:8080$|- 7080:8080|g' -i "${docker_conf_dir}/appdata/${1}.yml"
+        [[ "${options}" == 'dozzle' ]] && sed -r 's|- 8080:8080$|- 7081:8080|g' -i "${docker_conf_dir}/appdata/${1}.yml"
+        [[ "${options}" == 'qbittorrent' ]] && sed -r 's|devices:|devices: #qbit|g' -i "${docker_conf_dir}/appdata/${1}.yml" && sed -r 's|- /dev/net/tun:/dev/net/tun|- /dev/net/tun:/dev/net/tun #qbit|g' -i "${docker_conf_dir}/appdata/${1}.yml"
 
         sed -n 'p' "${docker_conf_dir}/appdata/${1}.yml" >> "${docker_conf_dir}/appdata/docker-compose.yml"
         rm -f "${docker_conf_dir}/appdata/${1}.yml"
@@ -511,11 +494,10 @@ get_app_compose() {
 #################################################################################################################################################
 # Run _multiselect function
 #################################################################################################################################################
-printf '\n%b' "↓ => down"
-printf '\n%b' "↑ => up"
-printf '\n%b' "⎵ (Space) => toggle selection"
-printf '\n%b\n' "⏎ (Enter) => confirm selection"
-printf '\n%b' " "
+printf '\n%b' " arrow down => down"
+printf '\n%b' " arrow up   => up"
+printf '\n%b' " Space bar  => toggle selection"
+printf '\n%b\n' " Enter key  => confirm selection"
 _multiselect
 #################################################################################################################################################
 # Process selections
@@ -526,13 +508,14 @@ while true; do
         [Yy]*)
             printf '\n%b\n' " ${ulmc} Creating docker-compose"
             for options in "${selected_options[@]}"; do
-                mkdir -p "${docker_conf_dir}/appdata/${options,,}"
+                mkdir -p "${docker_conf_dir}/appdata/${options}"
                 get_app_compose "${options}"
-                [[ "${options,,}" == "plex" ]] && plex_installed="yes"
-                [[ "${options,,}" =~ ^(radarr)$ ]] && mkdir -p "${docker_data_dir}/media/movies"
-                [[ "${options,,}" =~ ^(sonarr)$ ]] && mkdir -p "${docker_data_dir}/media/tv"
-                [[ "${options,,}" =~ ^(sabnzbd|nzbget)$ ]] && mkdir -p "${docker_data_dir}"/usenet/{tv,movies}
-                [[ "${options,,}" =~ ^(qbittorrent)$ ]] && mkdir -p "${docker_data_dir}"/torrents/{tv,movies}
+                [[ "${options}" == 'plex' ]] && plex_installed="yes"
+                [[ "${options}" == 'qbittorrent' ]] && qbit_installed="yes"
+                [[ "${options}" == 'radarr' ]] && mkdir -p "${docker_data_dir}/media/movies"
+                [[ "${options}" == 'sonarr' ]] && mkdir -p "${docker_data_dir}/media/tv"
+                [[ "${options}" =~ ^(sabnzbd|nzbget)$ ]] && mkdir -p "${docker_data_dir}"/usenet/{tv,movies}
+                [[ "${options}" == 'qbittorrent' ]] && mkdir -p "${docker_data_dir}"/torrents/{tv,movies}
             done
 
             if [[ "${plex_installed}" == "yes" ]]; then
@@ -548,14 +531,44 @@ while true; do
                 fi
             fi
 
+            if [[ "${qbit_installed}" == "yes" ]]; then
+                while true; do
+                    read -erp $'\n \e[32m\U2714\e[0m '"Do you want Qbittorrent installed with VPN? "$'\e[38;5;10m'"[y]es"$'\e[m'" or "$'\e[38;5;9m'"[n]o"$'\e[m'" : " -i "" yesno
+                    case "${yesno}" in
+                        [Yy]*)
+                            printf '\n%b\n\n' " ${utick} With VPN"
+                            mkdir -p "${docker_conf_dir}/appdata/qbittorrent/wireguard"
+                            read -erp $' \e[93m\U25cf\e[0m '"Place your "$'\e[38;5;81m'"wg0.conf"$'\e[m'" in:"$'\n\n \e[38;5;81m'"${docker_conf_dir}/appdata/qbittorrent/wireguard"$'\e[m\n\n \e[93m\U25cf\e[0m '"When that is done please confirm "$'\e[38;5;10m'"[y]es"$'\e[m'" : " -i "" yes
+                            case "${yes}" in
+                                [Yy]*)
+                                    if sed -r 's|AllowedIPs = (.*)|AllowedIPs = 0.0.0.0/1,128.0.0.0/1|g' -i "${docker_conf_dir}/appdata/qbittorrent/wireguard/wg0.conf" 2> /dev/null; then
+                                        printf '\n%b\n' " ${utick} wg0.conf found and fixed."
+                                    else
+                                        printf '\n%b\n\n ' " ${ucross} wg0.conf not found. Place file with filename ${clc}wg0.conf${cend} and restart script."
+                                        exit 1
+                                    fi
+                                    break
+                                    ;;
+                            esac
+                            ;;
+                        [Nn]*)
+                            printf '\n%b\n' " ${ucross} Without VPN."
+                            sed -r 's|VPN_ENABLED=true|VPN_ENABLED=false|g' -i "${docker_conf_dir}/appdata/.env"
+                            sed -r 's|devices: #qbit|#devices: #qbit|g' -i "${docker_conf_dir}/appdata/docker-compose.yml"
+                            sed -r 's|- /dev/net/tun:/dev/net/tun #qbit|#- /dev/net/tun:/dev/net/tun #qbit|g' -i "${docker_conf_dir}/appdata/docker-compose.yml"
+                            break
+                            ;;
+                    esac
+                done
+            fi
             printf '\n%b\n' " ${ulmc} Doing final permissions stuff"
             chown -R "${user}":"${group}" "${docker_data_dir}" "${docker_conf_dir}"
             chmod -R a=,a+rX,u+w,g+w "${docker_data_dir}" "${docker_conf_dir}"
             printf '\n%b\n' " ${utick} Permissions set."
 
             printf '\n%b\n' " ${uplus} Installing Pullio for auto updates"
-            if sudo wget -qO /usr/local/bin/pullio "https://raw.githubusercontent.com/hotio/pullio/master/pullio.sh"; then
-                sudo chmod +x /usr/local/bin/pullio
+            if wget -qO /usr/local/bin/pullio "https://raw.githubusercontent.com/hotio/pullio/master/pullio.sh"; then
+                chmod +x /usr/local/bin/pullio
                 printf '\n%b\n' " ${utick} Pullio installed"
             else
                 printf '\n%b\n' " ${ucross} There was a problem downloading then /usr/local/bin/pullio, try again"
