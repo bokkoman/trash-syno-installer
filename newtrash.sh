@@ -56,6 +56,21 @@ ugrc="\e[37m\U25cf\e[0m" ulgrcc="\e[97m\U25cf\e[0m"    # [u]nicode[gr]ey[c]ircle
 cdef="\e[39m" # [c]olor[def]ault
 bkend="\e[0m"
 cend="\e[0m" # [c]olor[end]
+
+#################################################################################################################################################
+# ascii banner trash-guides
+#################################################################################################################################################
+
+base64 -d <<< "H4sIALCm62IAA5VUQW7EMAi8V+ofuDWRqvUH+pRI9CE8vmYGbBInUhevnHXAY8wMEemmNCl2XhSv
+ru6TfX74bIhXtekwKYsGTL7YdL+67yAZo30jfoL9hhWxTOjw7JSHmyDxy90ukPKl2vP5RVK+kmNC
+9gMtB4J8lqOd77ZA+th6REeSI9Z5g8CdQUi8MXSFRCY+xNG++78erESAMVsLZzz9pTF0gazFr3ZP
+Act6PMd1SL8HCh3FD/ZZO42VJDkEqK6kKohFln4DObKYzoqg9BYUCOkoQ6pLseCyE2wO6Qfspfgk
+YC/P7UROcJUulOwHZKECfnEk3cAMt7H0LZ/h4VzDY0Zc/KkiknnMavQ8+xfGJWXkewJjgIERiurG
+f9fp2ePunhkMWQQbV5mxzx9klhdnN0h07Wj4ydaQVn4GhDJb86yQFBBlEd0eWVJmo/c1Y23t8FnL
+KZFo8KEctotOxYTSLYT3WMtocwdWfg2yofWsGwjFp1e8ecrybfvPJ/hdSLU/+6ZLBGIGAAA=" | gunzip
+
+sleep 3
+
 #################################################################################################################################################
 # check for root access and exit if the user does not have the required privileges.
 #################################################################################################################################################
