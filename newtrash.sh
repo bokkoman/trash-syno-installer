@@ -60,17 +60,20 @@ cend="\e[0m" # [c]olor[end]
 #################################################################################################################################################
 # ascii banner trash-guides
 #################################################################################################################################################
+printf "\n%b\n" "${cc}             ▀▀█▀▀ █▀▀█ █▀▀█ █▀▀ █░░█ ░░ ▒█▀▀█ █░░█ ░▀░ █▀▀▄ █▀▀ █▀▀ 
+             ░▒█░░ █▄▄▀ █▄▄█ ▀▀█ █▀▀█ ▀▀ ▒█░▄▄ █░░█ ▀█▀ █░░█ █▀▀ ▀▀█ 
+             ░▒█░░ ▀░▀▀ ▀░░▀ ▀▀▀ ▀░░▀ ░░ ▒█▄▄█ ░▀▀▀ ▀▀▀ ▀▀▀░ ▀▀▀ ▀▀▀"
 
-base64 -d <<< "H4sIALCm62IAA5VUQW7EMAi8V+ofuDWRqvUH+pRI9CE8vmYGbBInUhevnHXAY8wMEemmNCl2XhSv
-ru6TfX74bIhXtekwKYsGTL7YdL+67yAZo30jfoL9hhWxTOjw7JSHmyDxy90ukPKl2vP5RVK+kmNC
-9gMtB4J8lqOd77ZA+th6REeSI9Z5g8CdQUi8MXSFRCY+xNG++78erESAMVsLZzz9pTF0gazFr3ZP
-Act6PMd1SL8HCh3FD/ZZO42VJDkEqK6kKohFln4DObKYzoqg9BYUCOkoQ6pLseCyE2wO6Qfspfgk
-YC/P7UROcJUulOwHZKECfnEk3cAMt7H0LZ/h4VzDY0Zc/KkiknnMavQ8+xfGJWXkewJjgIERiurG
-f9fp2ePunhkMWQQbV5mxzx9klhdnN0h07Wj4ydaQVn4GhDJb86yQFBBlEd0eWVJmo/c1Y23t8FnL
-KZFo8KEctotOxYTSLYT3WMtocwdWfg2yofWsGwjFp1e8ecrybfvPJ/hdSLU/+6ZLBGIGAAA=" | gunzip
+printf "\n%b\n" "${cb}█████████████████████████████████████████▀████████████████████████████████████████████
+█─▄▄▄▄█▄─█─▄█▄─▀█▄─▄█─▄▄─█▄─▄███─▄▄─█─▄▄▄▄█▄─█─▄███▄─▄▄▀█─▄▄─█─▄▄▄─█▄─█─▄█▄─▄▄─█▄─▄▄▀█
+█▄▄▄▄─██▄─▄███─█▄▀─██─██─██─██▀█─██─█─██▄─██▄─▄█████─██─█─██─█─███▀██─▄▀███─▄█▀██─▄─▄█
+▀▄▄▄▄▄▀▀▄▄▄▀▀▄▄▄▀▀▄▄▀▄▄▄▄▀▄▄▄▄▄▀▄▄▄▄▀▄▄▄▄▄▀▀▄▄▄▀▀▀▀▄▄▄▄▀▀▄▄▄▄▀▄▄▄▄▄▀▄▄▀▄▄▀▄▄▄▄▄▀▄▄▀▄▄▀"
+
+printf "\n%b\n" "${cm}          ▀█▀ █▀▀▄ █▀▀ ▀▀█▀▀ █▀▀█ █░░ █░░ 　 ▒█▀▀▀█ █▀▀ █▀▀█ ░▀░ █▀▀█ ▀▀█▀▀ 
+          ▒█░ █░░█ ▀▀█ ░░█░░ █▄▄█ █░░ █░░ 　 ░▀▀▀▄▄ █░░ █▄▄▀ ▀█▀ █░░█ ░░█░░ 
+          ▄█▄ ▀░░▀ ▀▀▀ ░░▀░░ ▀░░▀ ▀▀▀ ▀▀▀ 　 ▒█▄▄▄█ ▀▀▀ ▀░▀▀ ▀▀▀ █▀▀▀ ░░▀░░"
 
 sleep 3
-
 #################################################################################################################################################
 # check for root access and exit if the user does not have the required privileges.
 #################################################################################################################################################
@@ -553,6 +556,12 @@ while true; do
                             read -erp $' \e[93m\U25cf\e[0m '"Place your "$'\e[38;5;81m'"wg0.conf"$'\e[m'" in:"$'\n\n \e[38;5;81m'"${docker_conf_dir}/appdata/qbittorrent/wireguard"$'\e[m\n\n \e[93m\U25cf\e[0m '"When that is done please confirm "$'\e[38;5;10m'"[y]es"$'\e[m'" : " -i "" yes
                             case "${yes}" in
                                 [Yy]*)
+                                    cat > "${docker_conf_dir}/appdata/qbittorrent/wireguard/preup.sh" << EOF
+wgserver=$(grep Endpoint "${CONFIG_DIR}/wireguard/wg0.conf" | awk '{print $3}')
+gateway=$(ip -o -4 route show to default | awk '{print $3}')
+
+ip -4 route add ${wgserver%:*} via ${gateway} dev eth0
+EOF
                                     if sed -r 's|AllowedIPs = (.*)|AllowedIPs = 0.0.0.0/1,128.0.0.0/1|g' -i "${docker_conf_dir}/appdata/qbittorrent/wireguard/wg0.conf" 2> /dev/null; then
                                         printf '\n%b\n' " ${utick} wg0.conf found and fixed."
                                     else
