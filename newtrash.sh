@@ -439,15 +439,17 @@ printf '\n%b\n' " ${utick} User has rights to share."
 #################################################################################################################################################
 # Create the necessary file structure for vpn tunnel device
 # Thanks @Gabe
-if ! lsmod | grep -q "^tun\s"; then
-    insmod /lib/modules/tun.ko
-    cat > "/usr/local/etc/rc.d/tun.sh" << EOF
-    #!/bin/sh -e
+install_tun() {
+    if ! lsmod | grep -q "^tun\s"; then
+        insmod /lib/modules/tun.ko
+        cat > "/usr/local/etc/rc.d/tun.sh" << EOF
+        #!/bin/sh -e
 
-    insmod /lib/modules/tun.ko
+        insmod /lib/modules/tun.ko
 EOF
-    chmod a+x /usr/local/etc/rc.d/tun.sh
+        chmod a+x /usr/local/etc/rc.d/tun.sh
 fi
+}
 #################################################################################################################################################
 # Create docker-compose.yml and download .env
 #################################################################################################################################################
