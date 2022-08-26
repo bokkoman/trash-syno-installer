@@ -558,6 +558,7 @@ while true; do
                         [Yy]*)
                             printf '\n%b\n\n' " ${utick} With VPN"
                             mkdir -p "${docker_conf_dir}/appdata/qbittorrent/wireguard"
+                            install_tun
                             read -erp $' \e[93m\U25cf\e[0m '"Place your "$'\e[38;5;81m'"wg0.conf"$'\e[m'" in:"$'\n\n \e[38;5;81m'"${docker_conf_dir}/appdata/qbittorrent/wireguard"$'\e[m\n\n \e[93m\U25cf\e[0m '"When that is done please confirm "$'\e[38;5;10m'"[y]es"$'\e[m'" : " -i "" yes
                             case "${yes}" in
                                 [Yy]*)
